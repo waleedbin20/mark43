@@ -3,37 +3,59 @@ import { z } from "zod";
 import { Citation } from "@mark43/shared";
 import { getConfig } from "../core/config";
 
-// FBI Crime Data Explorer API — free key at https://api.data.gov/signup
-const FBI_BASE = "https://api.usa.gov/crime/fbi/sapi/api";
+// FBI Crime Data Explorer (CDE) API — free key at https://api.data.gov/signup
+const FBI_BASE = "https://api.usa.gov/crime/fbi/cde";
+const CDE_VIEWER = "https://cde.ucr.cjis.gov";
 
-async function fetchFbiNationalSummary(
-    crimeType: "violent-crime" | "property-crime",
-    fromYear: number,
-    toYear: number,
-    apiKey: string
-): Promise<any> {
-    const url = `${FBI_BASE}/summarized/national/${crimeType}/${fromYear}/${toYear}?API_KEY=${apiKey}`;
-    const res = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!res.ok) throw new Error(`FBI API error: ${res.status} ${res.statusText}`);
-    return res.json();
+interface FbiSummarized {
+    offenses?: {
+        rates?: Record<string, Record<string, number>>;
+        actuals?: Record<string, Record<string, number>>;
+    };
 }
 
-async function fetchFbiStateData(
-    stateAbbr: string,
+async function fetchFbiSummarized(
+    scopePath: string,
     crimeType: "violent-crime" | "property-crime",
     fromYear: number,
     toYear: number,
     apiKey: string
-): Promise<any> {
-    const url = `${FBI_BASE}/summarized/agencies/byStateAbbr/${stateAbbr}/${crimeType}/${fromYear}/${toYear}?API_KEY=${apiKey}`;
+): Promise<FbiSummarized> {
+    // The CDE summarized endpoint expects MM-YYYY bounds and returns monthly series.
+    const url = `${FBI_BASE}/summarized/${scopePath}/${crimeType}?from=01-${fromYear}&to=12-${toYear}&API_KEY=${apiKey}`;
     const res = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!res.ok) throw new Error(`FBI state API error: ${res.status}`);
-    return res.json();
+    if (!res.ok) throw new Error(`FBI API error: ${res.status} ${res.statusText}`);
+    return (await res.json()) as FbiSummarized;
+}
+
+/** Picks the "...Offenses" series (not "...Clearances") from a CDE label map. */
+function pickOffenceSeries(
+    map: Record<string, Record<string, number>> | undefined
+): Record<string, number> | null {
+    if (!map) return null;
+    const label = Object.keys(map).find((l) => /offenses/i.test(l)) ?? Object.keys(map)[0];
+    return label ? map[label] : null;
+}
+
+/** Aggregates a MM-YYYY series into per-year totals and averages. */
+function aggregateByYear(series: Record<string, number>): Record<string, { total: number; avg: number }> {
+    const buckets: Record<string, number[]> = {};
+    for (const [key, value] of Object.entries(series)) {
+        const year = key.split("-")[1] ?? key;
+        (buckets[year] ??= []).push(value);
+    }
+
+    const result: Record<string, { total: number; avg: number }> = {};
+    for (const [year, values] of Object.entries(buckets)) {
+        const total = values.reduce((s, v) => s + v, 0);
+        result[year] = { total, avg: total / values.length };
+    }
+    return result;
 }
 
 /**
  * Tool: fetch_us_crime_statistics
- * Retrieves US national or state-level crime statistics from the FBI Crime Data Explorer API.
+ * Retrieves US national or state-level crime statistics from the FBI Crime Data Explorer (CDE) API.
  * Requires FBI_API_KEY env var (free key at https://api.data.gov/signup).
  */
 export const fbiCrimeDataTool = new DynamicStructuredTool({
@@ -74,30 +96,56 @@ export const fbiCrimeDataTool = new DynamicStructuredTool({
         }
 
         try {
-            const data = state
-                ? await fetchFbiStateData(state, crime_type, from_year, to_year, FBI_API_KEY)
-                : await fetchFbiNationalSummary(crime_type, from_year, to_year, FBI_API_KEY);
+            const scopePath = state ? `state/${state.toUpperCase()}` : "national";
+            const data = await fetchFbiSummarized(scopePath, crime_type, from_year, to_year, FBI_API_KEY);
 
-            const rows: any[] = data?.data ?? data?.results ?? [];
+            const offenceCounts = pickOffenceSeries(data.offenses?.actuals);
+            const offenceRates = pickOffenceSeries(data.offenses?.rates);
 
-            const citations: Citation[] = rows.slice(0, 5).map((row: any, i: number) => ({
-                id: `fbi-${crime_type}-${row.year ?? i}`,
-                source: "api.usa.gov/crime/fbi/sapi",
-                title: `FBI UCR: ${crime_type} ${state ? `(${state})` : "(National)"} ${row.year ?? ""}`,
-                snippet: `Year: ${row.year ?? "?"} | Rate: ${row.rate ?? row.actual ?? "N/A"} | Offenses: ${row.total ?? row.actual ?? "N/A"}`,
+            if (!offenceCounts && !offenceRates) {
+                return JSON.stringify({
+                    error: "FBI API returned no offence data for this scope/period",
+                    scope: state ? `State: ${state}` : "National",
+                    period: `${from_year}-${to_year}`,
+                });
+            }
+
+            const countsByYear = offenceCounts ? aggregateByYear(offenceCounts) : {};
+            const ratesByYear = offenceRates ? aggregateByYear(offenceRates) : {};
+            const years = Array.from(
+                new Set([...Object.keys(countsByYear), ...Object.keys(ratesByYear)])
+            ).sort();
+
+            const scopeLabel = state ? state.toUpperCase() : "National";
+
+            const citations: Citation[] = years.map((year) => {
+                const total = countsByYear[year]?.total;
+                const avgRate = ratesByYear[year]?.avg;
+                return {
+                    id: `fbi-${crime_type}-${scopeLabel}-${year}`,
+                    source: CDE_VIEWER,
+                    title: `FBI CDE: ${crime_type} (${scopeLabel}) ${year}`,
+                    snippet: `Year ${year}: ${total != null ? `${total.toLocaleString()} offences` : "offences N/A"}${avgRate != null ? `, avg monthly rate ${avgRate.toFixed(2)} per 100k` : ""}.`,
+                };
+            });
+
+            const yearly = years.map((year) => ({
+                year,
+                totalOffences: countsByYear[year]?.total ?? null,
+                avgMonthlyRatePer100k: ratesByYear[year]?.avg != null ? Number(ratesByYear[year].avg.toFixed(2)) : null,
             }));
 
             return JSON.stringify({
                 crimeType: crime_type,
-                scope: state ? `State: ${state}` : "National",
-                period: `${from_year}–${to_year}`,
-                rowCount: rows.length,
+                scope: state ? `State: ${state.toUpperCase()}` : "National",
+                period: `${from_year}-${to_year}`,
+                yearly,
                 citations,
-                source: "api.usa.gov/crime/fbi/sapi (UCR/NIBRS)",
+                source: "FBI Crime Data Explorer (api.usa.gov/crime/fbi/cde, UCR/NIBRS)",
                 jurisdiction: "United States",
             });
         } catch (err: any) {
-            return JSON.stringify({ error: err.message, source: "api.usa.gov/crime/fbi/sapi" });
+            return JSON.stringify({ error: err.message, source: "api.usa.gov/crime/fbi/cde" });
         }
     },
 });

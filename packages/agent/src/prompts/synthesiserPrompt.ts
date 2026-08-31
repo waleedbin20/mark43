@@ -27,14 +27,14 @@ clickable source list separately, so listing sources again would duplicate it.`;
 const GROUNDING_RULES = `Rules: Only state facts from tool results. Mark uncertain items with "reportedly" or "according to [source]". If the tools returned no usable data, say so plainly instead of inventing content.`;
 
 export function buildSynthesiserSystemPrompt(
-  citationsContext: string,
-  conversationSummary: string
+    citationsContext: string,
+    conversationSummary: string
 ): string {
-  const sessionContext = conversationSummary
-    ? `\nSession context:\n${conversationSummary}`
-    : "";
+    const sessionContext = conversationSummary
+        ? `\nSession context:\n${conversationSummary}`
+        : "";
 
-  return `You are the Mark43 Public Safety Intelligence Analyst.
+    return `You are the Mark43 Public Safety Intelligence Analyst.
 
 ${getCurrentDateContext()}
 

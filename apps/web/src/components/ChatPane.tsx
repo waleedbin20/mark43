@@ -135,8 +135,8 @@ export function ChatPane({
 
               <div
                 className={`max-w-[85%] rounded-2xl p-4 space-y-3 ${msg.role === "user"
-                    ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-600/10"
-                    : "glass-card text-slate-200"
+                  ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-600/10"
+                  : "glass-card text-slate-200"
                   }`}
               >
                 {/* Tool Badges */}

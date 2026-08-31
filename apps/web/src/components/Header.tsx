@@ -41,9 +41,8 @@ export function Header({ isStreaming }: { isStreaming: boolean }) {
 
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs font-mono">
           <Radio
-            className={`w-3.5 h-3.5 ${
-              isStreaming ? "text-amber-400 animate-pulse" : "text-emerald-400"
-            }`}
+            className={`w-3.5 h-3.5 ${isStreaming ? "text-amber-400 animate-pulse" : "text-emerald-400"
+              }`}
           />
           <span className="text-slate-300">
             {isStreaming ? (

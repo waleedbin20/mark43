@@ -2,6 +2,7 @@ import { AIMessage, ToolMessage } from "@langchain/core/messages";
 import { Citation, ToolCallLog } from "@mark43/shared";
 import { AgentState } from "../state";
 import { getIntelligenceTools } from "../../tools";
+import { filterValidCitations } from "../../tools/citationValidator";
 
 const MAX_LOGGED_OUTPUT_LENGTH = 600;
 
@@ -37,10 +38,14 @@ export async function toolDispatcherNode(
     if (execution.log) toolLogs.push(execution.log);
   }
 
+  // Drop citations whose links are unreachable so the UI never shows dead sources.
+  const validCitations = await filterValidCitations(citations);
+  const droppedCount = citations.length - validCitations.length;
+
   return {
     messages: toolMessages,
     toolLogs,
-    citations,
+    citations: validCitations,
     stepLogs: [
       {
         id: `step-dispatch-${Date.now()}`,
@@ -49,7 +54,9 @@ export async function toolDispatcherNode(
         timestamp: new Date().toISOString(),
         details: `Executed: ${toolCalls
           .map((tc) => tc.name)
-          .join(", ")}, ${citations.length} citation(s)`,
+          .join(", ")}, ${validCitations.length} valid citation(s)${
+          droppedCount > 0 ? `, ${droppedCount} unreachable dropped` : ""
+        }`,
       },
     ],
   };
