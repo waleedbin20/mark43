@@ -10,13 +10,14 @@
 1. [What the agent does](#1-what-the-agent-does)
 2. [Architecture overview](#2-architecture-overview)
 3. [Data sources](#3-data-sources)
-4. [LangGraph ReAct loop](#4-langgraph-react-loop)
+4. [Orchestration — the LangGraph ReAct loop](#4-orchestration--the-langgraph-react-loop)
 5. [RAG pipeline](#5-rag-pipeline)
 6. [Session memory](#6-session-memory)
 7. [Police UK API — full coverage & rate limiting](#7-police-uk-api--full-coverage--rate-limiting)
-8. [LLM choice & justification](#8-llm-choice--justification)
-9. [Setup & running](#9-setup--running)
-10. [Presentation Q&A](#10-presentation-qa)
+8. [Security, validation & real-time context](#8-security-validation--real-time-context)
+9. [LLM choice & justification](#9-llm-choice--justification)
+10. [Setup & running](#10-setup--running)
+11. [Presentation Q&A](#11-presentation-qa)
 
 ---
 
@@ -28,9 +29,13 @@ The agent is a **public safety intelligence analyst** that autonomously gathers 
 - Agentic tool-calling loop (ReAct via LangGraph)
 - Hybrid RAG over ingested UK policing corpus (Graph RAG + semantic search)
 - All Police UK API endpoints with proper rate limiting
-- FBI Crime Data Explorer (US statistics)
+- FBI Crime Data Explorer CDE API (US statistics)
 - Session memory (MemorySaver + summarisation at 10-message threshold)
-- SSE streaming from Express → React frontend
+- Input sanitisation and prompt-injection screening
+- Citation reachability validation (the UI never shows a dead link)
+- Real-time date awareness for recency questions
+- Read-only introspection endpoints (graph, session memory, entity store)
+- SSE streaming from Express → React frontend with markdown + clickable citations
 
 **Explicitly out of scope:**
 - Authentication / multi-user auth (would add auth middleware in production)
@@ -101,7 +106,7 @@ mark43/
 │   ├── api/            Express + SSE streaming endpoint
 │   │   └── src/
 │   │       ├── middleware/  security (helmet/cors), rateLimiter, errorHandler
-│   │       ├── routes/      agent (SSE stream), health
+│   │       ├── routes/      agent (SSE stream), introspect (graph/memory/store), health
 │   │       ├── mappers/     agentEventMapper (graph output -> SSE events)
 │   │       ├── utils/       sse (writer + headers)
 │   │       └── config/      env (typed env access)
@@ -112,10 +117,10 @@ mark43/
 │   │       ├── agent/     graph.ts, state.ts, memory.ts
 │   │       │   └── nodes/   plannerNode, toolDispatcherNode,
 │   │       │                synthesiserNode, formatCitations
-│   │       ├── prompts/   planner / synthesiser / summariser prompts
-│   │       │              + humanizer output rules
+│   │       ├── prompts/   planner / synthesiser / summariser prompts,
+│   │       │              humanizer output rules, real-time date context
 │   │       ├── security/  inputSanitizer (prompt-injection guard)
-│   │       ├── tools/     7 tools + shared rate limiter
+│   │       ├── tools/     7 tools + shared rate limiter + citationValidator
 │   │       ├── rag/       chromaCloud, vectorStore, graphStore,
 │   │       │              ingestion (chunking), migrate (seeding)
 │   │       └── core/      config.ts (Zod), llm.ts (LLM factory)
@@ -139,7 +144,9 @@ mark43/
 | **Agent** | `prompts/` | All system prompts in one place, including the humanizer output rules |
 | **Agent** | `security/` | Sanitises and screens the user query before it reaches the LLM |
 | **Agent** | `tools/` | 7 LLM-callable tools (RAG + live APIs) sharing a rate limiter |
+| **Agent** | `tools/citationValidator.ts` | Drops citations whose links are unreachable before they reach the UI |
 | **Agent** | `rag/` | Chunking, ingestion, hybrid vector search, entity graph |
+| **API** | `routes/introspect.ts` | Read-only endpoints exposing the graph, session memory, and entity store |
 
 ### Request lifecycle (one query, end to end)
 
@@ -147,7 +154,7 @@ mark43/
 2. **Validate.** The route parses the body with `AgentQueryRequestSchema` (Zod). Invalid bodies get a 400 before any work runs. Rate limiting and helmet headers are already applied by middleware.
 3. **Stream the graph.** The route calls `graph.stream(state, { thread_id: sessionId })`. The checkpointer loads any earlier state for that session.
 4. **Sanitise.** The planner runs `sanitiseUserQuery` on the input, strips control characters, caps length, and flags injection patterns.
-5. **Reason and act.** The planner calls tools, the dispatcher executes them and collects citations, and control loops back until the planner stops (or the iteration cap is hit).
+5. **Reason and act.** The planner calls tools, the dispatcher executes them, collects citations, and drops any whose links are unreachable. Control loops back until the planner stops (or the iteration cap is hit).
 6. **Synthesise.** The synthesiser turns the gathered citations into a briefing, applying the humanizer output rules.
 7. **Map to SSE.** For every node update, `agentEventMapper` emits `node_start`, `citation`, `tool_end`, `log`, `token`, and `node_end` events. The browser renders each as it arrives.
 8. **Persist.** The checkpointer saves the final state under `sessionId`, ready for the next follow-up question.
@@ -163,7 +170,9 @@ mark43/
 | **data.police.uk** | England, Wales, Northern Ireland — crimes, outcomes, forces, neighbourhoods, stop & search | None required | **15 req/s avg, burst 30** (token bucket enforced) | [API docs](https://data.police.uk/docs/) |
 | **www.gov.uk/api/search.json** | UK government policy papers, guidance, statistics, press releases | None required | Polite use | [Gov.uk Content API](https://docs.publishing.service.gov.uk/api/content-api) |
 | **college.police.uk/rss/news** | College of Policing research news & publications | None required | Polite use | [College of Policing](https://college.police.uk/) |
-| **api.usa.gov/crime/fbi/sapi** | US national & state crime statistics (UCR / NIBRS) | Free key ([api.data.gov/signup](https://api.data.gov/signup)) | Free tier | [FBI Crime Data Explorer](https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/docApi) |
+| **api.usa.gov/crime/fbi/cde** | US national & state crime statistics (UCR / NIBRS), summarised by year | Free key ([api.data.gov/signup](https://api.data.gov/signup)) | Free tier | [FBI Crime Data Explorer](https://cde.ucr.cjis.gov/) |
+
+> The FBI tool calls the current CDE `summarized/national/{offense}` and `summarized/state/{ST}/{offense}` endpoints (the older `sapi` API is deprecated and returns 404). It aggregates the monthly series the API returns into per-year totals and rates.
 
 ### Police UK API — full endpoint coverage
 
@@ -214,7 +223,7 @@ Seeded at setup time via `pnpm --filter @mark43/agent seed:chroma`:
 | Source | Collection | Content |
 |--------|-----------|---------|
 | Gov.uk Search API (3 queries) | `mark43_rms_policies`, `incident_intelligence` | AI policing, crime prevention policy, emergency services |
-| College of Policing RSS (20 items) | `mark43_rms_policies` | Research news, professional standards |
+| College of Policing RSS (best-effort) | `mark43_rms_policies` | Research news, professional standards (the site sometimes returns 403 to bots; ingestion skips it gracefully) |
 | data.police.uk crime categories | `incident_intelligence` | Official crime category taxonomy |
 
 ---
@@ -336,7 +345,47 @@ The single `TokenBucket` instance is module-level (singleton), so concurrent too
 
 ---
 
-## 8. LLM choice & justification
+## 8. Security, validation & real-time context
+
+### Input sanitisation & prompt-injection guard (`security/inputSanitizer.ts`)
+Every user query is untrusted input. Before it reaches the LLM, `sanitiseUserQuery()`:
+- strips control characters and caps length (denial-of-service guard)
+- flags known prompt-injection patterns ("ignore previous instructions", "you are now", "reveal your prompt", DAN, developer mode)
+
+A flagged query is still processed, but the planner treats it strictly as data to research, reinforced by a rule in the planner prompt. This is defence in depth, not a single filter.
+
+### Citation validation (`tools/citationValidator.ts`)
+Public sources sometimes return links that 404 (Gov.uk finder slugs, deprecated pages). After the dispatcher collects citations, `filterValidCitations()`:
+- resolves each citation's source to a URL (absolute, bare host, or a URL found in the snippet)
+- checks reachability in parallel with a 5s timeout: HEAD first, then GET if HEAD is not OK (many servers, e.g. the FBI CDE viewer, return 404 to HEAD but 200 to GET)
+- drops citations whose URL is unreachable; keeps citations that have no URL as plain-text references
+
+The UI therefore never shows a dead link, and the dispatcher step log reports how many were dropped.
+
+### Real-time date awareness (`prompts/dateContext.ts`)
+`getCurrentDateContext()` injects today's date into the planner and synthesiser prompts on every request, so "recent", "latest", and "last N years" are interpreted against the real current date rather than the model's training cutoff.
+
+### Humanizer output rules (`prompts/humanizerRules.ts`)
+The synthesiser prompt includes a condensed "signs of AI writing" ruleset: no em dashes, no sales language, plain verbs, no invented facts, attribute every statistic. This keeps briefings readable and analyst-like.
+
+### Transport security (`apps/api/src/middleware/`)
+- **helmet** sets hardened HTTP response headers
+- **CORS** restricts origins via `CORS_ORIGIN`
+- **express-rate-limit** caps the agent endpoint at 30 requests/min per IP
+- a central error handler hides internal detail in production
+
+### Introspection endpoints (read-only)
+For transparency and debugging, the API exposes the agent's internals:
+
+| Endpoint | Shows |
+|----------|-------|
+| `GET /api/agent/graph` | LangGraph nodes, edges, and a Mermaid diagram |
+| `GET /api/agent/memory/:sessionId` | The session checkpoint: messages, summary, citations |
+| `GET /api/agent/graph-store` | The Graph RAG entity store: stats, entities, edges |
+
+---
+
+## 9. LLM choice & justification
 
 ### Chosen: OpenRouter → `openai/gpt-4o-mini`
 
@@ -372,7 +421,7 @@ If I had one more day, I'd swap to `PostgresSaver` and add `LangSmith` tracing.
 
 ---
 
-## 9. Setup & running
+## 10. Setup & running
 
 ### Prerequisites
 - Node.js 20+
@@ -391,8 +440,9 @@ cd mark43
 pnpm install
 
 # 2. Configure environment
-cp .env.example .env
+cp .env.example .env.local
 # Fill in OPENROUTER_API_KEY, OPENAI_API_KEY, and optionally CHROMA_* and FBI_API_KEY
+# Env is read from the repo-root .env.local (falling back to .env) from any workspace.
 
 # 3. (Optional) Seed the RAG knowledge base from real public sources
 pnpm --filter @mark43/agent seed:chroma
@@ -419,7 +469,7 @@ pnpm dev
 
 ---
 
-## 10. Presentation Q&A
+## 11. Presentation Q&A
 
 ### Part 1 — What you built & why (60-second framing)
 
@@ -445,17 +495,18 @@ pnpm dev
 ### Part 3 — Architecture walkthrough notes
 
 Walk through these in order:
-1. **Frontend → SSE** — `useAgentStream.ts` opens an SSE connection with a stable `sessionId`, renders streamed tokens in real-time
-2. **Express route** — validates with Zod, calls `getOrBuildGraph().stream()` — emphasise the singleton pattern (MemorySaver requires same graph instance)
-3. **Graph topology** — draw the planner → dispatcher loop on the screen; show `shouldCallTools()` is the only routing decision
+1. **Frontend → SSE** — `useAgentStream.ts` opens an SSE connection with a stable `sessionId`, renders streamed tokens as markdown with clickable source citations
+2. **Express route** — validates with Zod, applies helmet + rate limiting, calls `getOrBuildGraph().stream()` — emphasise the singleton pattern (MemorySaver requires same graph instance)
+3. **Graph topology** — draw the planner → dispatcher loop on the screen; show `shouldCallTools()` is the only routing decision (or open `GET /api/agent/graph` for the live Mermaid diagram)
 4. **Tool selection** — open `tools/index.ts`, show the 7 tools; explain the LLM reads descriptions not keywords
 5. **Rate limiter** — show `policeUkRateLimiter.ts`; explain token bucket vs leaky bucket equivalence
-6. **RAG pipeline** — show `migrate.ts` fetching real Gov.uk + College of Policing; show `graphStore.ts` entity extraction
-7. **Memory** — show `memory.ts` summarisation threshold; explain `thread_id` → `MemorySaver`
+6. **RAG pipeline** — show `migrate.ts` fetching real Gov.uk + College of Policing; show `graphStore.ts` entity extraction (or `GET /api/agent/graph-store`)
+7. **Memory** — show `memory.ts` summarisation threshold; explain `thread_id` → `MemorySaver` (or `GET /api/agent/memory/:sessionId`)
+8. **Safety layers** — `inputSanitizer.ts` (prompt-injection guard) and `citationValidator.ts` (drops dead links); mention the humanizer output rules and real-time date injection
 
 ### Part 4 — LLM choice & key decision
 
-**LLM choice:** OpenRouter routing to `openai/gpt-4o-mini` because it has the most reliable tool-calling at the lowest cost point. The split between OpenRouter (chat) and direct OpenAI (embeddings) is intentional — OpenRouter doesn't proxy embedding endpoints.
+**LLM choice:** OpenRouter routing to `openai/gpt-4o-mini` because it has the most reliable tool-calling at the lowest cost point. The split between OpenRouter (chat) and OpenAI embeddings via LangChain's `@langchain/openai` is intentional — OpenRouter doesn't proxy embedding endpoints.
 
 **Key architectural decision to defend:**  
 *"I used a flat JSON-persisted entity graph instead of Neo4j for Graph RAG."*

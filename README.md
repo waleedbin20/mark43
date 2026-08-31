@@ -10,11 +10,15 @@ A production-grade agentic system that synthesises publicly available law enforc
 ## Quick start
 
 ```bash
-cp .env.example .env          # fill in OPENROUTER_API_KEY and OPENAI_API_KEY
+cp .env.example .env.local    # fill in OPENROUTER_API_KEY + OPENAI_API_KEY (CHROMA_* and FBI_API_KEY optional)
 pnpm install
-pnpm --filter @mark43/agent seed:chroma   # optional: seed RAG knowledge base
+pnpm --filter @mark43/agent seed:chroma   # optional: seed RAG knowledge base into Chroma Cloud
 pnpm dev                      # API :4000 · Web :5173
 ```
+
+> Env is loaded from the repo-root `.env.local` (falling back to `.env`) regardless of which
+> workspace the command runs in. Live tools work without Chroma; the RAG tool just returns no
+> citations until you seed.
 
 ---
 
@@ -25,7 +29,7 @@ pnpm dev                      # API :4000 · Web :5173
 | [data.police.uk](https://data.police.uk/docs/) | UK crimes, outcomes, forces, neighbourhoods, stop & search | None |
 | [www.gov.uk/api](https://docs.publishing.service.gov.uk/api/content-api) | UK government policy & guidance | None |
 | [college.police.uk/rss](https://college.police.uk/) | College of Policing research news | None |
-| [api.usa.gov/crime/fbi/sapi](https://cde.ucr.cjis.gov/LATEST/webapp/#/pages/docApi) | FBI Crime Data Explorer (UCR/NIBRS) | Free key |
+| [api.usa.gov/crime/fbi/cde](https://cde.ucr.cjis.gov/) | FBI Crime Data Explorer, CDE API (UCR/NIBRS) | Free key |
 
 ---
 
@@ -48,11 +52,14 @@ pnpm dev                      # API :4000 · Web :5173
 ## Key capabilities
 
 - **Agentic ReAct loop** — the LLM picks which of 7 tools to call, evaluates the results, and iterates. No keyword routing.
-- **Live public data** — UK Police API (full endpoint coverage), Gov.uk, College of Policing, and the FBI Crime Data Explorer.
+- **Live public data** — UK Police API (full endpoint coverage), Gov.uk, College of Policing, and the FBI Crime Data Explorer CDE API.
 - **Hybrid RAG** — Chroma Cloud dense + sparse search with RRF fusion, plus entity-graph expansion over the ingested corpus.
 - **Session memory** — remembers earlier turns via LangGraph checkpointing and compresses long histories with LLM summarisation.
-- **Rate limiting & security** — token-bucket limiter for the Police UK API, helmet headers, CORS, per-IP request limits, and prompt-injection screening.
-- **Streaming UI** — Express Server-Sent Events into a React chat interface.
+- **Real-time date awareness** — today's date is injected into the prompts so "recent" and "last N years" resolve correctly.
+- **Citation validation** — unreachable source links are checked and dropped, so the UI never shows a dead citation.
+- **Security** — token-bucket limiter for the Police UK API, helmet headers, CORS, per-IP request limits, and prompt-injection screening.
+- **Introspection endpoints** — `GET /api/agent/graph`, `/memory/:sessionId`, and `/graph-store` expose the graph, session memory, and entity store.
+- **Streaming UI** — Express Server-Sent Events into a React chat that renders markdown with clickable, deep-linked source citations.
 
 ---
 
@@ -64,6 +71,7 @@ Design detail, diagrams, and the presentation Q&A live in **[`.github/docs/ARCHI
 - Full Police UK API endpoint coverage
 - RAG pipeline and the chunking strategy
 - LangGraph orchestration and session memory
+- Security, citation validation, and introspection endpoints
 - LLM choice, trade-offs, and setup reference
 
 A 4-turn example conversation demonstrating multi-step reasoning, tool use, and memory is in **[`TRANSCRIPT.md`](TRANSCRIPT.md)**.
