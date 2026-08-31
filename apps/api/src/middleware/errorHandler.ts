@@ -3,7 +3,7 @@ import { env } from "../config/env";
 
 /** 404 handler for unmatched routes. */
 export function notFoundHandler(_req: Request, res: Response): void {
-  res.status(404).json({ error: "Not found" });
+    res.status(404).json({ error: "Not found" });
 }
 
 /**
@@ -11,20 +11,20 @@ export function notFoundHandler(_req: Request, res: Response): void {
  * detailed message in development, avoiding internal detail leakage in production.
  */
 export function errorHandler(
-  err: Error,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
+    err: Error,
+    _req: Request,
+    res: Response,
+    _next: NextFunction
 ): void {
-  console.error("Unhandled error:", err);
+    console.error("Unhandled error:", err);
 
-  if (res.headersSent) {
-    res.end();
-    return;
-  }
+    if (res.headersSent) {
+        res.end();
+        return;
+    }
 
-  res.status(500).json({
-    error: "Internal server error",
-    ...(env.isProduction ? {} : { detail: err.message }),
-  });
+    res.status(500).json({
+        error: "Internal server error",
+        ...(env.isProduction ? {} : { detail: err.message }),
+    });
 }

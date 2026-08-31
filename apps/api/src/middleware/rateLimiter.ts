@@ -8,9 +8,9 @@ const MAX_REQUESTS_PER_WINDOW = 30;
  * live API calls), so this caps abusive request volume without blocking normal use.
  */
 export const agentRateLimiter = rateLimit({
-  windowMs: WINDOW_MS,
-  max: MAX_REQUESTS_PER_WINDOW,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many requests. Please slow down and try again shortly." },
+    windowMs: WINDOW_MS,
+    max: MAX_REQUESTS_PER_WINDOW,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests. Please slow down and try again shortly." },
 });

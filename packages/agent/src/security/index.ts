@@ -1,5 +1,5 @@
 export {
-  sanitiseUserQuery,
-  detectPromptInjection,
-  type SanitisedQuery,
+    sanitiseUserQuery,
+    detectPromptInjection,
+    type SanitisedQuery,
 } from "./inputSanitizer";

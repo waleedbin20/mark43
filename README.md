@@ -9,11 +9,36 @@ A production-grade agentic system that synthesises publicly available law enforc
 
 ## Quick start
 
+All commands run from the **repo root** (`mark43/`). pnpm workspaces handle the sub-packages, so you do not need to `cd` into `apps/api` or `apps/web`.
+
+**Prerequisites:** Node.js 20+ and pnpm 9+. If `pnpm` is not recognised, enable it with `corepack enable` or install it via `npm install -g pnpm`.
+
 ```bash
-cp .env.example .env.local    # fill in OPENROUTER_API_KEY + OPENAI_API_KEY (CHROMA_* and FBI_API_KEY optional)
+# 1. Enter the project and install everything (root + all workspaces)
+cd mark43
 pnpm install
-pnpm --filter @mark43/agent seed:chroma   # optional: seed RAG knowledge base into Chroma Cloud
-pnpm dev                      # API :4000 · Web :5173
+
+# 2. Configure environment (repo root)
+cp .env.example .env.local
+# fill in OPENROUTER_API_KEY + OPENAI_API_KEY (CHROMA_* and FBI_API_KEY optional)
+
+# 3. (Optional) Seed the RAG knowledge base into Chroma Cloud
+pnpm seed:chroma
+
+# 4. Run BOTH backend + frontend together (Turborepo)
+pnpm dev
+```
+
+- **Backend (API)** → http://localhost:4000  (Express + SSE)
+- **Frontend (Web)** → http://localhost:5173  (React + Vite) — open this in your browser
+
+### Run the backend and frontend separately
+
+If you prefer two terminals (from the repo root):
+
+```bash
+pnpm --filter api dev    # backend only  → :4000
+pnpm --filter web dev    # frontend only → :5173
 ```
 
 > Env is loaded from the repo-root `.env.local` (falling back to `.env`) regardless of which

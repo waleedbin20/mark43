@@ -8,10 +8,10 @@ import { writeSSE } from "../utils/sse";
 type GraphStreamChunk = Record<string, GraphNodeOutput>;
 
 interface GraphNodeOutput {
-  citations?: unknown[];
-  toolLogs?: unknown[];
-  stepLogs?: unknown[];
-  finalAnswer?: string;
+    citations?: unknown[];
+    toolLogs?: unknown[];
+    stepLogs?: unknown[];
+    finalAnswer?: string;
 }
 
 const SYNTHESISER_NODE = "intelligenceSynthesiser";
@@ -22,27 +22,27 @@ const SYNTHESISER_NODE = "intelligenceSynthesiser";
  * wire protocol in one place.
  */
 export function emitNodeEvents(res: Response, chunk: GraphStreamChunk): void {
-  const nodeName = Object.keys(chunk)[0];
-  const output = chunk[nodeName];
-  const timestamp = new Date().toISOString();
+    const nodeName = Object.keys(chunk)[0];
+    const output = chunk[nodeName];
+    const timestamp = new Date().toISOString();
 
-  writeSSE(res, "node_start", { node: nodeName, timestamp });
+    writeSSE(res, "node_start", { node: nodeName, timestamp });
 
-  for (const citation of output?.citations ?? []) {
-    writeSSE(res, "citation", { citation });
-  }
+    for (const citation of output?.citations ?? []) {
+        writeSSE(res, "citation", { citation });
+    }
 
-  for (const toolLog of output?.toolLogs ?? []) {
-    writeSSE(res, "tool_end", { toolCall: toolLog });
-  }
+    for (const toolLog of output?.toolLogs ?? []) {
+        writeSSE(res, "tool_end", { toolCall: toolLog });
+    }
 
-  for (const step of output?.stepLogs ?? []) {
-    writeSSE(res, "log", step);
-  }
+    for (const step of output?.stepLogs ?? []) {
+        writeSSE(res, "log", step);
+    }
 
-  if (nodeName === SYNTHESISER_NODE && output?.finalAnswer) {
-    writeSSE(res, "token", { token: output.finalAnswer });
-  }
+    if (nodeName === SYNTHESISER_NODE && output?.finalAnswer) {
+        writeSSE(res, "token", { token: output.finalAnswer });
+    }
 
-  writeSSE(res, "node_end", { node: nodeName, timestamp: new Date().toISOString() });
+    writeSSE(res, "node_end", { node: nodeName, timestamp: new Date().toISOString() });
 }

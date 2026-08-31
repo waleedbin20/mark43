@@ -24,18 +24,18 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
  * https://data.police.uk/docs/#api-call-limits
  */
 export function getIntelligenceTools(): DynamicStructuredTool[] {
-  return [
-    // Knowledge base
-    graphRagTool,              // Graph RAG: semantic + entity graph over ingested corpus
+    return [
+        // Knowledge base
+        graphRagTool,              // Graph RAG: semantic + entity graph over ingested corpus
 
-    // Police UK (all endpoints, shared rate limiter)
-    policeUkTool,              // Crime: street crimes, outcomes, categories, availability
-    policeUkForcesTool,        // Forces: list, detail, senior officers
-    policeUkNeighbourhoodTool, // Neighbourhoods: list, detail, boundary, team, events, priorities, locate
-    policeUkStopSearchTool,    // Stop & search: by area, at location, no location, by force
+        // Police UK (all endpoints, shared rate limiter)
+        policeUkTool,              // Crime: street crimes, outcomes, categories, availability
+        policeUkForcesTool,        // Forces: list, detail, senior officers
+        policeUkNeighbourhoodTool, // Neighbourhoods: list, detail, boundary, team, events, priorities, locate
+        policeUkStopSearchTool,    // Stop & search: by area, at location, no location, by force
 
-    // International / policy
-    govUkTool,                 // Gov.uk policy + College of Policing RSS
-    fbiCrimeDataTool,          // US: FBI Crime Data Explorer (UCR/NIBRS)
-  ];
+        // International / policy
+        govUkTool,                 // Gov.uk policy + College of Policing RSS
+        fbiCrimeDataTool,          // US: FBI Crime Data Explorer (UCR/NIBRS)
+    ];
 }

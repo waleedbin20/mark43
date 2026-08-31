@@ -12,9 +12,9 @@ const JSON_BODY_LIMIT = "1mb";
  *  - json body parser caps payload size to blunt oversized-body attacks
  */
 export function securityMiddleware(): RequestHandler[] {
-  return [
-    helmet(),
-    cors({ origin: env.corsOrigin, credentials: true }),
-    express.json({ limit: JSON_BODY_LIMIT }),
-  ];
+    return [
+        helmet(),
+        cors({ origin: env.corsOrigin, credentials: true }),
+        express.json({ limit: JSON_BODY_LIMIT }),
+    ];
 }
