@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Square, Bot, User, Sparkles, Database, SlidersHorizontal } from "lucide-react";
 import { ChatMessage, SendMessageOptions } from "../hooks/useAgentStream";
 import { ToolBadge } from "./ToolBadge";
+import { MarkdownMessage } from "./MarkdownMessage";
+import { CitationList } from "./CitationList";
 import { ChromaCollectionName } from "@mark43/shared";
 
 interface ChatPaneProps {
@@ -166,14 +168,25 @@ export function ChatPane({
                 )}
 
                 {/* Message Content */}
-                <div className="text-sm leading-relaxed whitespace-pre-wrap font-sans">
-                  {msg.content || (
+                {msg.role === "assistant" ? (
+                  msg.content ? (
+                    <MarkdownMessage content={msg.content} />
+                  ) : (
                     <span className="inline-flex items-center gap-2 text-cyan-400 italic text-xs">
                       <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
                       Executing Chroma Cloud RAG & reasoning graph...
                     </span>
-                  )}
-                </div>
+                  )
+                ) : (
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                    {msg.content}
+                  </div>
+                )}
+
+                {/* Clickable source citations */}
+                {msg.role === "assistant" && msg.citations && msg.citations.length > 0 && (
+                  <CitationList citations={msg.citations} />
+                )}
 
                 <div className="text-[10px] text-slate-400/80 text-right">
                   {new Date(msg.timestamp).toLocaleTimeString()}

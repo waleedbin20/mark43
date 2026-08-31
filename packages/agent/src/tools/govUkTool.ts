@@ -54,7 +54,7 @@ function extractXmlTag(xml: string, tag: string): string {
 }
 
 async function queryGovUk(keywords: string, count = 8): Promise<GovUkResult[]> {
-    const url = `https://www.gov.uk/api/search.json?q=${encodeURIComponent(keywords)}&count=${count}&filter_content_store_document_type=guidance,policy_paper,press_release,research,statistics`;
+    const url = `https://www.gov.uk/api/search.json?q=${encodeURIComponent(keywords)}&count=${count}`;
     const res = await fetch(url, { headers: { Accept: "application/json" } });
     if (!res.ok) throw new Error(`Gov.uk API error: ${res.status}`);
     const json = await res.json() as { results?: GovUkResult[] };

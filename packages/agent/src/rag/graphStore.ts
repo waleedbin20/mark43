@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { findRepoRoot } from "../core/loadEnv";
 
 export type EntityType = "location" | "organization" | "crime_type" | "policy" | "technology" | "jurisdiction" | "person";
 
@@ -33,7 +34,9 @@ export class EntityGraphStore {
     private persistPath: string;
 
     constructor(persistPath?: string) {
-        this.persistPath = persistPath ?? path.join(process.cwd(), "graph_store.json");
+        // Resolve against the repo root so the seed script and the API server
+        // (which run from different working directories) share one graph file.
+        this.persistPath = persistPath ?? path.join(findRepoRoot(), "graph_store.json");
         this.load();
     }
 

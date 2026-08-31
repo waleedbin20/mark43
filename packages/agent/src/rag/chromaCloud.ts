@@ -135,7 +135,7 @@ export async function searchChromaCloudHybrid(options: {
       success: false,
       results: [],
       citations: [],
-      summary: "CHROMA_API_KEY not configured. Falling back to local knowledge base.",
+      summary: "CHROMA_API_KEY not configured; knowledge-base search unavailable.",
     };
   }
 
@@ -149,7 +149,7 @@ export async function searchChromaCloudHybrid(options: {
     let search = new Search();
 
     if (enableRrf) {
-      // Reciprocal Rank Fusion combining Dense (Qwen) and Sparse (Splade)
+      // Reciprocal Rank Fusion combining dense (OpenAI) and sparse (Splade)
       search = search.rank(
         Rrf({
           ranks: [
@@ -177,34 +177,35 @@ export async function searchChromaCloudHybrid(options: {
     const results: ChromaSearchResult[] = [];
     const citations: Citation[] = [];
 
-    // Extract returned rows
-    if (searchResponse && Array.isArray(searchResponse)) {
-      for (const row of searchResponse) {
-        const item: ChromaSearchResult = {
-          id: (row as any).id || `chroma-${Math.random()}`,
-          document: (row as any).document || "",
-          metadata: (row as any).metadata || {},
-          score: (row as any).score,
-        };
-        results.push(item);
+    // search() returns a columnar result; rows() yields row objects grouped per
+    // query. We issue a single query, so the rows live in group [0].
+    const rowGroups =
+      typeof (searchResponse as any).rows === "function"
+        ? (searchResponse as any).rows()
+        : [];
+    const rows: any[] = Array.isArray(rowGroups?.[0]) ? rowGroups[0] : [];
 
-        citations.push({
-          id: item.id,
-          source: item.metadata.source || collectionName,
-          title: item.metadata.title || "Chroma Cloud Document",
-          documentId: item.metadata.documentId,
-          collection: collectionName,
-          score: item.score,
-          snippet: item.document.slice(0, 300) + (item.document.length > 300 ? "..." : ""),
-        });
-      }
+    for (const row of rows) {
+      const metadata = row.metadata || {};
+      const document = row.document || "";
+      results.push({ id: row.id, document, metadata, score: row.score });
+
+      citations.push({
+        id: row.id,
+        source: metadata.source || collectionName,
+        title: metadata.title || "Chroma Cloud Document",
+        documentId: metadata.documentId,
+        collection: collectionName,
+        score: row.score,
+        snippet: document.slice(0, 300) + (document.length > 300 ? "..." : ""),
+      });
     }
 
     return {
       success: true,
       results,
       citations,
-      summary: `Chroma Cloud Hybrid Search matched ${citations.length} document(s) in collection "${collectionName}".`,
+      summary: `Chroma Cloud hybrid search matched ${citations.length} document(s) in collection "${collectionName}".`,
     };
   } catch (err: any) {
     console.error("Chroma Cloud Search failed:", err.message);
