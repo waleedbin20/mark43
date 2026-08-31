@@ -26,7 +26,7 @@ export function Header({ isStreaming }: { isStreaming: boolean }) {
             </span>
           </div>
           <p className="text-xs text-slate-400">
-            Tactical LangGraph Agent • Qwen Dense + Splade Sparse Hybrid RRF Search
+            Tactical LangGraph Agent • OpenAI Dense + Splade Sparse Hybrid RRF Search
           </p>
         </div>
       </div>
@@ -58,7 +58,7 @@ export function Header({ isStreaming }: { isStreaming: boolean }) {
 
         <div className="hidden md:flex items-center gap-1 text-xs text-cyan-300 bg-cyan-950/40 border border-cyan-800/30 px-2.5 py-1 rounded-md">
           <Sparkles className="w-3 h-3 text-cyan-400" />
-          <span>Qwen + Splade RRF</span>
+          <span>OpenAI + Splade RRF</span>
         </div>
       </div>
     </header>

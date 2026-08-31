@@ -3,6 +3,7 @@ import { env } from "./config/env";
 import { securityMiddleware } from "./middleware/security";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { agentRouter } from "./routes/agent";
+import { introspectRouter } from "./routes/introspect";
 import { healthRouter } from "./routes/health";
 
 const app: Express = express();
@@ -13,6 +14,7 @@ app.use(securityMiddleware());
 // Routes
 app.use(healthRouter);
 app.use("/api/agent", agentRouter);
+app.use("/api/agent", introspectRouter);
 
 // Fallbacks
 app.use(notFoundHandler);

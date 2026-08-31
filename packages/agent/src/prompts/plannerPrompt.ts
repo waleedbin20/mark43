@@ -6,6 +6,8 @@
  * Tool selection is entirely LLM-driven; there is no keyword routing.
  */
 
+import { getCurrentDateContext } from "./dateContext";
+
 const AVAILABLE_TOOLS = `Available tools:
 - search_public_safety_knowledge: Graph RAG search over ingested UK policing research and Gov.uk policy documents
 - fetch_uk_crime_data: Live street-level crime, outcomes, and categories from data.police.uk
@@ -34,6 +36,8 @@ export function buildPlannerSystemPrompt(conversationSummary: string): string {
     : "";
 
   return `You are the Mark43 Public Safety Intelligence Analyst, an expert system that synthesises publicly available information about law enforcement, policing technology, crime analytics, and public safety policy across the UK and United States.
+
+${getCurrentDateContext()}
 
 Your role is to autonomously gather intelligence by calling the appropriate tools, then synthesise findings into structured briefings.
 

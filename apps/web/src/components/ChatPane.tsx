@@ -4,7 +4,6 @@ import { ChatMessage, SendMessageOptions } from "../hooks/useAgentStream";
 import { ToolBadge } from "./ToolBadge";
 import { MarkdownMessage } from "./MarkdownMessage";
 import { CitationList } from "./CitationList";
-import { ChromaCollectionName } from "@mark43/shared";
 
 interface ChatPaneProps {
   messages: ChatMessage[];
@@ -20,8 +19,6 @@ export function ChatPane({
   onStopStream,
 }: ChatPaneProps) {
   const [input, setInput] = useState("");
-  const [selectedCollection, setSelectedCollection] =
-    useState<ChromaCollectionName>("mark43_rms_policies");
   const [enableHybrid, setEnableHybrid] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -41,44 +38,31 @@ export function ChatPane({
 
   const samplePrompts = [
     {
-      label: "Mark43 RMS SOPs",
-      collection: "mark43_rms_policies" as ChromaCollectionName,
-      query: "What are the mandatory fields and chain of custody rules for Mark43 RMS reports?",
+      label: "UK Policy",
+      query: "What does UK guidance say about police use of facial recognition?",
     },
     {
-      label: "Priority 1 Dispatch",
-      collection: "mark43_rms_policies" as ChromaCollectionName,
-      query: "What is the dispatch timeline and supervisor protocol for Priority 1 emergency responses?",
+      label: "UK Crime Data",
+      query: "What are the most common crime categories near Westminster, London?",
     },
     {
-      label: "Legal Penal Code § 459",
-      collection: "legal_penal_codes" as ChromaCollectionName,
-      query: "Explain the statutory definition and degrees of burglary under Penal Code Section 459.",
+      label: "Neighbourhood",
+      query: "What are the neighbourhood policing priorities in the City of London?",
     },
     {
-      label: "Sector 4 Incident Brief",
-      collection: "incident_intelligence" as ChromaCollectionName,
-      query: "Retrieve incident briefing #2026-088 regarding commercial forced entry in Sector 4.",
+      label: "UK vs US",
+      query: "How do UK and US violent crime trends compare in recent years?",
     },
   ];
 
   return (
     <div className="h-full flex flex-col glass-panel rounded-2xl overflow-hidden border border-slate-800">
-      {/* Control Bar: Collection Shard & Hybrid Search */}
+      {/* Control Bar: knowledge base + hybrid search */}
       <div className="px-4 py-2.5 bg-slate-900/95 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
           <Database className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="text-slate-400 font-medium">Chroma Collection:</span>
-          <select
-            value={selectedCollection}
-            onChange={(e) => setSelectedCollection(e.target.value as ChromaCollectionName)}
-            className="bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 font-mono"
-            disabled={isStreaming}
-          >
-            <option value="mark43_rms_policies">mark43_rms_policies (SOPs & Dispatch)</option>
-            <option value="legal_penal_codes">legal_penal_codes (Statutes & Laws)</option>
-            <option value="incident_intelligence">incident_intelligence (Field Reports)</option>
-          </select>
+          <span className="text-slate-400 font-medium">Knowledge base:</span>
+          <span className="text-cyan-300 font-mono">Gov.uk + College of Policing + live APIs</span>
         </div>
 
         <div className="flex items-center gap-3">
@@ -92,7 +76,7 @@ export function ChatPane({
             />
             <span className="flex items-center gap-1">
               <SlidersHorizontal className="w-3 h-3 text-emerald-400" />
-              Hybrid RRF (Dense Qwen + Sparse Splade)
+              Hybrid RRF (OpenAI + Splade)
             </span>
           </label>
         </div>
@@ -107,10 +91,10 @@ export function ChatPane({
             </div>
             <div>
               <h3 className="text-base font-bold text-white">
-                Mark43 LangGraph Tactical Assistant + Chroma Cloud
+                Mark43 Public Safety Intelligence Agent
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                Equipped with Chroma Cloud multi-collection sharding, Dense Qwen + Sparse Splade hybrid search, GroupBy deduplication, and line chunking.
+                Autonomous ReAct agent over live UK Police, Gov.uk, and FBI data with OpenAI + Splade hybrid RAG and entity-graph expansion.
               </p>
             </div>
 
@@ -122,7 +106,6 @@ export function ChatPane({
                 <button
                   key={i}
                   onClick={() => {
-                    setSelectedCollection(sample.collection);
                     onSendMessage(sample.query, {
                       enableHybridSearch: enableHybrid,
                     });
@@ -141,9 +124,8 @@ export function ChatPane({
           messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex gap-3.5 ${
-                msg.role === "user" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex gap-3.5 ${msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
             >
               {msg.role === "assistant" && (
                 <div className="w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shrink-0 mt-1">
@@ -152,11 +134,10 @@ export function ChatPane({
               )}
 
               <div
-                className={`max-w-[85%] rounded-2xl p-4 space-y-3 ${
-                  msg.role === "user"
+                className={`max-w-[85%] rounded-2xl p-4 space-y-3 ${msg.role === "user"
                     ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-600/10"
                     : "glass-card text-slate-200"
-                }`}
+                  }`}
               >
                 {/* Tool Badges */}
                 {msg.toolLogs && msg.toolLogs.length > 0 && (
@@ -211,7 +192,7 @@ export function ChatPane({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type tactical query (e.g. 'What are Mark43 CAD report rules?' or 'Check penal code § 459')..."
+            placeholder="Ask about UK/US crime, policing policy, forces, or neighbourhoods..."
             className="flex-1 bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-sans"
             disabled={isStreaming}
           />

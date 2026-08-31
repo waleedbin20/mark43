@@ -7,16 +7,16 @@ import { resolve, dirname } from "path";
  * pnpm-workspace.yaml marker. Falls back to the start directory if not found.
  */
 export function findRepoRoot(start: string = process.cwd()): string {
-  let dir = start;
+    let dir = start;
 
-  for (let i = 0; i < 8; i++) {
-    if (existsSync(resolve(dir, "pnpm-workspace.yaml"))) return dir;
-    const parent = dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
+    for (let i = 0; i < 8; i++) {
+        if (existsSync(resolve(dir, "pnpm-workspace.yaml"))) return dir;
+        const parent = dirname(dir);
+        if (parent === dir) break;
+        dir = parent;
+    }
 
-  return start;
+    return start;
 }
 
 /**
@@ -29,7 +29,7 @@ export function findRepoRoot(start: string = process.cwd()): string {
  * already-set variable), then .env as a fallback.
  */
 export function loadRootEnv(): void {
-  const root = findRepoRoot();
-  loadDotenv({ path: resolve(root, ".env.local") });
-  loadDotenv({ path: resolve(root, ".env") });
+    const root = findRepoRoot();
+    loadDotenv({ path: resolve(root, ".env.local") });
+    loadDotenv({ path: resolve(root, ".env") });
 }

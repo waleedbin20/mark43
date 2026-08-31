@@ -78,7 +78,7 @@ async function fetchGovUkDocuments(keywords: string, count = 15): Promise<Ingest
       content: `# ${r.title}\n\n${r.description ?? ""}\n\nDocument type: ${r.content_store_document_type ?? "unknown"}\nOrganisations: ${(r.organisations ?? []).map((o: any) => o.title).join(", ")}\nURL: https://www.gov.uk${r.link ?? ""}`,
       metadata: {
         documentId: `govuk-${i}-${(r.link ?? String(i)).replace(/\//g, "-")}`,
-        source: `www.gov.uk${r.link ?? ""}`,
+        source: `https://www.gov.uk${r.link ?? ""}`,
         title: r.title,
         collection: "mark43_rms_policies" as ChromaCollectionName,
         category: r.content_store_document_type ?? "guidance",

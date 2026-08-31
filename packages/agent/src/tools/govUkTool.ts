@@ -123,13 +123,13 @@ export const govUkTool = new DynamicStructuredTool({
         const citations: Citation[] = [
             ...results.govUk.map((r, i) => ({
                 id: `govuk-${i}-${Date.now()}`,
-                source: "www.gov.uk",
+                source: r.link ? `https://www.gov.uk${r.link}` : "https://www.gov.uk",
                 title: r.title,
                 snippet: `${r.description ?? ""}${r.organisations?.length ? ` | ${r.organisations.map((o) => o.title).join(", ")}` : ""}`.slice(0, 400),
             })),
             ...results.collegeOfPolicing.map((r, i) => ({
                 id: `cop-rss-${i}-${Date.now()}`,
-                source: "college.police.uk",
+                source: r.link || "https://www.college.police.uk",
                 title: r.title,
                 snippet: `${r.description}`.slice(0, 400),
             })),

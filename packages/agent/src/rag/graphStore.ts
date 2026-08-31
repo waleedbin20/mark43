@@ -124,6 +124,22 @@ export class EntityGraphStore {
         };
     }
 
+    /** Serialisable entity list for inspection endpoints. */
+    getEntities() {
+        return Array.from(this.entities.values()).map((e) => ({
+            name: e.name,
+            type: e.type,
+            chunkCount: e.chunkIds.size,
+            chunkIds: Array.from(e.chunkIds),
+            aliases: e.aliases,
+        }));
+    }
+
+    /** Serialisable edge list for inspection endpoints. */
+    getEdges() {
+        return this.edges;
+    }
+
     /** Persist to disk for inspection and warm restarts */
     save(): void {
         try {
