@@ -12,6 +12,7 @@ import { getConfig } from "../../core/config";
 import { summariseConversationIfNeeded } from "../memory";
 import { buildPlannerSystemPrompt } from "../../prompts";
 import { sanitiseUserQuery } from "../../security";
+import { toValidLLMHistory } from "./sanitizeMessages";
 
 /**
  * Planner node: runs one step of the ReAct loop. It reasons about the query,
@@ -39,10 +40,12 @@ export async function intelligencePlannerNode(
     const llmWithTools = getChatLLM(false).bindTools(getIntelligenceTools());
     const systemMessage = new SystemMessage(buildPlannerSystemPrompt(summary));
 
-    const hasHumanMessage = trimmedMessages.some((m) => m instanceof HumanMessage);
+    // Guarantee a valid tool_calls -> tool-response sequence (see toValidLLMHistory).
+    const safeHistory = toValidLLMHistory(trimmedMessages);
+    const hasHumanMessage = safeHistory.some((m) => m instanceof HumanMessage);
     const contextMessages: BaseMessage[] = hasHumanMessage
-        ? trimmedMessages
-        : [...trimmedMessages, new HumanMessage(sanitised.query)];
+        ? safeHistory
+        : [...safeHistory, new HumanMessage(sanitised.query)];
 
     const response = await llmWithTools.invoke([systemMessage, ...contextMessages]);
     const toolCallNames = (response as AIMessage).tool_calls?.map((tc) => tc.name) ?? [];
