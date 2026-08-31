@@ -1,0 +1,218 @@
+{
+  "entities": [
+    {
+      "key": "uk",
+      "name": "uk",
+      "type": "location",
+      "chunkIds": [
+        "govuk-0--guidance-download-the-hmrc-app_chunk_0",
+        "govuk-1--government-news-drones-dna-losses-and-mission-creep-feature-in-obscc-annual-report_chunk_0",
+        "govuk-2--government-news-report-finds-worrying-vacuum-in-surveillance-camera-plans_chunk_0",
+        "govuk-3--government-publications-police-use-of-facial-recognition_chunk_0",
+        "govuk-4--government-publications-dpdi-bill-committee-evidence-from-the-bscc_chunk_0",
+        "govuk-5--government-publications-biometrics-and-forensics-ethics-group-meeting-minutes_chunk_0",
+        "govuk-6--government-publications-cdei-publishes-briefing-paper-on-facial-recognition-technology_chunk_0",
+        "govuk-7--government-publications-surveillance-camera-commissioner-newsletters_chunk_0",
+        "govuk-8--government-publications-commissioners-response-to-call-for-evidence-on-police-reform_chunk_0",
+        "govuk-9--government-publications-changes-to-the-functions-of-the-bscc-independent-report_chunk_0",
+        "govuk-10--government-publications-response-to-the-ai-growth-lab-call-for-evidence_chunk_0",
+        "govuk-11--government-publications-commissioners-response-to-the-live-facial-recognition-consultation_chunk_0",
+        "govuk-12--government-publications-opc-consultation-on-biometric-information-commissioner-response_chunk_0",
+        "govuk-13--government-publications-biometrics-and-forensics-ethics-group-annual-report-2022-to-2024_chunk_0",
+        "govuk-14--government-publications-biometrics-and-surveillance-camera-commissioner-report-2023-to-2024_chunk_0",
+        "govuk-0--guidance-ip-enforcement-in-indonesia_chunk_0",
+        "govuk-1--apply-postal-vote_chunk_0",
+        "govuk-2--guidance-ip-enforcement-in-vietnam_chunk_0",
+        "govuk-3--government-publications-general-fund-revenue-account-budget_chunk_0",
+        "govuk-4--government-publications-general-fund-revenue-account-outturn_chunk_0",
+        "govuk-5--guidance-inclusive-britain-action-plan-updates_chunk_0",
+        "govuk-6--government-publications-crime-and-policing-news-update-december-2014_chunk_0",
+        "govuk-7--government-publications-public-order-bill-overarching-documents_chunk_0",
+        "govuk-8--government-publications-research-into-the-section-60-stop-and-search-pilot_chunk_0",
+        "govuk-9--government-consultations-police-and-law-enforcement-access-to-driver-data-held-by-the-dvla_chunk_0",
+        "govuk-10--government-publications-crime-and-policing-news-update-december-2013_chunk_0",
+        "govuk-11--government-publications-public-perceptions-of-policing-a-review-of-research-and-literature_chunk_0",
+        "govuk-12--government-publications-crime-and-policing-news-update-october-2013_chunk_0",
+        "govuk-13--government-publications-the-report-of-the-commission-on-race-and-ethnic-disparities_chunk_0",
+        "govuk-14--government-publications-police-powers-and-procedures-in-england-and-wales-201112-user-guide_chunk_0",
+        "govuk-0--government-news-cnc-heroes-celebrated-by-chief-constable_chunk_0",
+        "govuk-1--government-publications-the-emergency-services-mobile-communications-programme_chunk_0",
+        "govuk-2--call-charges_chunk_0",
+        "govuk-3--government-publications-understanding-behaviours-and-expectations-in-the-uk-a-guide-for-asylum-seekers_chunk_0",
+        "govuk-4--government-publications-evaluating-the-implementation-of-right-care-right-person_chunk_0",
+        "govuk-5--report-benefit-fraud_chunk_0",
+        "govuk-6--foreign-travel-advice-united-arab-emirates_chunk_0",
+        "govuk-7--sign-in-universal-credit_chunk_0",
+        "govuk-8--employment-tribunal-decisions-mr-n-flowers-and-others-v-east-of-england-ambulance-trust-3400310-2015_chunk_0",
+        "govuk-9--log-in-register-hmrc-online-services_chunk_0",
+        "govuk-10--terrorism-national-emergency_chunk_0",
+        "govuk-11--government-publications-public-emergency-call-service-disruption-sunday-25-june-2023-post-incident-review_chunk_0",
+        "govuk-12--report-immigration-crime_chunk_0",
+        "govuk-13--report-tax-fraud_chunk_0",
+        "govuk-14--foreign-travel-advice-spain_chunk_0",
+        "police-uk-crime-categories_chunk_0",
+        "govuk-7--employment-tribunal-decisions-mr-n-flowers-and-others-v-east-of-england-ambulance-trust-3400310-2015_chunk_0",
+        "govuk-8--sign-in-universal-credit_chunk_0",
+        "govuk-14--government-publications-the-southport-inquiry-phase-1-report_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "us",
+      "name": "us",
+      "type": "jurisdiction",
+      "chunkIds": [
+        "govuk-0--guidance-download-the-hmrc-app_chunk_0",
+        "govuk-3--government-publications-police-use-of-facial-recognition_chunk_0",
+        "govuk-6--government-publications-cdei-publishes-briefing-paper-on-facial-recognition-technology_chunk_0",
+        "govuk-11--government-publications-commissioners-response-to-the-live-facial-recognition-consultation_chunk_0",
+        "govuk-1--apply-postal-vote_chunk_0",
+        "govuk-3--government-publications-general-fund-revenue-account-budget_chunk_0",
+        "govuk-4--government-publications-general-fund-revenue-account-outturn_chunk_0",
+        "govuk-5--guidance-inclusive-britain-action-plan-updates_chunk_0",
+        "govuk-8--government-publications-research-into-the-section-60-stop-and-search-pilot_chunk_0",
+        "govuk-11--government-publications-public-perceptions-of-policing-a-review-of-research-and-literature_chunk_0",
+        "govuk-14--government-publications-police-powers-and-procedures-in-england-and-wales-201112-user-guide_chunk_0",
+        "govuk-1--government-publications-the-emergency-services-mobile-communications-programme_chunk_0",
+        "govuk-5--report-benefit-fraud_chunk_0",
+        "govuk-8--employment-tribunal-decisions-mr-n-flowers-and-others-v-east-of-england-ambulance-trust-3400310-2015_chunk_0",
+        "govuk-9--log-in-register-hmrc-online-services_chunk_0",
+        "govuk-10--terrorism-national-emergency_chunk_0",
+        "govuk-13--report-tax-fraud_chunk_0",
+        "police-uk-crime-categories_chunk_0",
+        "govuk-7--employment-tribunal-decisions-mr-n-flowers-and-others-v-east-of-england-ambulance-trust-3400310-2015_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "ai",
+      "name": "ai",
+      "type": "technology",
+      "chunkIds": [
+        "govuk-1--government-news-drones-dna-losses-and-mission-creep-feature-in-obscc-annual-report_chunk_0",
+        "govuk-10--government-publications-response-to-the-ai-growth-lab-call-for-evidence_chunk_0",
+        "govuk-5--guidance-inclusive-britain-action-plan-updates_chunk_0",
+        "govuk-8--government-publications-research-into-the-section-60-stop-and-search-pilot_chunk_0",
+        "govuk-1--government-publications-the-emergency-services-mobile-communications-programme_chunk_0",
+        "govuk-3--government-publications-understanding-behaviours-and-expectations-in-the-uk-a-guide-for-asylum-seekers_chunk_0",
+        "govuk-10--terrorism-national-emergency_chunk_0",
+        "govuk-11--government-publications-public-emergency-call-service-disruption-sunday-25-june-2023-post-incident-review_chunk_0",
+        "govuk-14--foreign-travel-advice-spain_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "home_office",
+      "name": "home office",
+      "type": "organization",
+      "chunkIds": [
+        "govuk-3--government-publications-police-use-of-facial-recognition_chunk_0",
+        "govuk-11--government-publications-commissioners-response-to-the-live-facial-recognition-consultation_chunk_0",
+        "govuk-6--government-publications-crime-and-policing-news-update-december-2014_chunk_0",
+        "govuk-7--government-publications-public-order-bill-overarching-documents_chunk_0",
+        "govuk-8--government-publications-research-into-the-section-60-stop-and-search-pilot_chunk_0",
+        "govuk-9--government-consultations-police-and-law-enforcement-access-to-driver-data-held-by-the-dvla_chunk_0",
+        "govuk-10--government-publications-crime-and-policing-news-update-december-2013_chunk_0",
+        "govuk-11--government-publications-public-perceptions-of-policing-a-review-of-research-and-literature_chunk_0",
+        "govuk-12--government-publications-crime-and-policing-news-update-october-2013_chunk_0",
+        "govuk-14--government-publications-police-powers-and-procedures-in-england-and-wales-201112-user-guide_chunk_0",
+        "govuk-1--government-publications-the-emergency-services-mobile-communications-programme_chunk_0",
+        "govuk-3--government-publications-understanding-behaviours-and-expectations-in-the-uk-a-guide-for-asylum-seekers_chunk_0",
+        "govuk-4--government-publications-evaluating-the-implementation-of-right-care-right-person_chunk_0",
+        "govuk-10--terrorism-national-emergency_chunk_0",
+        "govuk-14--government-publications-the-southport-inquiry-phase-1-report_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "facial_recognition",
+      "name": "facial recognition",
+      "type": "technology",
+      "chunkIds": [
+        "govuk-3--government-publications-police-use-of-facial-recognition_chunk_0",
+        "govuk-6--government-publications-cdei-publishes-briefing-paper-on-facial-recognition-technology_chunk_0",
+        "govuk-11--government-publications-commissioners-response-to-the-live-facial-recognition-consultation_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "police_reform",
+      "name": "police reform",
+      "type": "policy",
+      "chunkIds": [
+        "govuk-8--government-publications-commissioners-response-to-call-for-evidence-on-police-reform_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "rms",
+      "name": "rms",
+      "type": "technology",
+      "chunkIds": [
+        "govuk-4--government-publications-general-fund-revenue-account-outturn_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "public_order",
+      "name": "public order",
+      "type": "policy",
+      "chunkIds": [
+        "govuk-7--government-publications-public-order-bill-overarching-documents_chunk_0",
+        "police-uk-crime-categories_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "stop_and_search",
+      "name": "stop and search",
+      "type": "policy",
+      "chunkIds": [
+        "govuk-8--government-publications-research-into-the-section-60-stop-and-search-pilot_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "england",
+      "name": "england",
+      "type": "location",
+      "chunkIds": [
+        "govuk-14--government-publications-police-powers-and-procedures-in-england-and-wales-201112-user-guide_chunk_0",
+        "govuk-4--government-publications-evaluating-the-implementation-of-right-care-right-person_chunk_0",
+        "govuk-8--employment-tribunal-decisions-mr-n-flowers-and-others-v-east-of-england-ambulance-trust-3400310-2015_chunk_0",
+        "police-uk-crime-categories_chunk_0",
+        "govuk-7--employment-tribunal-decisions-mr-n-flowers-and-others-v-east-of-england-ambulance-trust-3400310-2015_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "wales",
+      "name": "wales",
+      "type": "location",
+      "chunkIds": [
+        "govuk-14--government-publications-police-powers-and-procedures-in-england-and-wales-201112-user-guide_chunk_0",
+        "police-uk-crime-categories_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "dhs",
+      "name": "dhs",
+      "type": "jurisdiction",
+      "chunkIds": [
+        "govuk-4--government-publications-evaluating-the-implementation-of-right-care-right-person_chunk_0"
+      ],
+      "aliases": []
+    },
+    {
+      "key": "northern_ireland",
+      "name": "northern ireland",
+      "type": "location",
+      "chunkIds": [
+        "police-uk-crime-categories_chunk_0"
+      ],
+      "aliases": []
+    }
+  ],
+  "edges": []
+}

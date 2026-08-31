@@ -1,0 +1,19 @@
+{
+  "name": "mark43-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "seed:chroma": "pnpm --filter @mark43/agent seed:chroma",
+    "clean": "turbo clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.2",
+    "prettier": "^3.4.2"
+  },
+  "packageManager": "pnpm@9.15.4"
+}
