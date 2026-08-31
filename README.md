@@ -9,10 +9,8 @@ A production-grade agentic system that synthesises publicly available law enforc
 
 
 ## Demo
-<video width="320" height="240" controls>
-  <source src="https://streamable.com/zvp9je" type="video/mp4">
+<video src="[https://your-domain.com/path-to-video.mp](https://streamable.com/zvp9je)4" controls="controls" width="100%">
 </video>
----
 
 
 ## Quick start
