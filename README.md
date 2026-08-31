@@ -7,6 +7,14 @@ A production-grade agentic system that synthesises publicly available law enforc
 
 ---
 
+
+## Demo
+<video width="320" height="240" controls>
+  <source src=".github/docs/demo.mp4" type="video/mp4">
+</video>
+---
+
+
 ## Quick start
 
 All commands run from the **repo root** (`mark43/`). pnpm workspaces handle the sub-packages, so you do not need to `cd` into `apps/api` or `apps/web`.
@@ -87,6 +95,7 @@ pnpm --filter web dev    # frontend only → :5173
 - **Streaming UI** — Express Server-Sent Events into a React chat that renders markdown with clickable, deep-linked source citations.
 
 ---
+
 
 ## Documentation
 
