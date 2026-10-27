@@ -11,6 +11,10 @@ A production-grade agentic system that synthesises publicly available law enforc
 ## Demo
 https://streamable.com/zvp9je
 
+https://github.com/user-attachments/assets/3b7d27b0-236f-4989-aa79-2c963c18306c
+
+
+
 ## Quick start
 
 All commands run from the **repo root** (`mark43/`). pnpm workspaces handle the sub-packages, so you do not need to `cd` into `apps/api` or `apps/web`.
